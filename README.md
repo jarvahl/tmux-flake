@@ -46,9 +46,7 @@ bindings and status styling belong in the consuming configuration:
   imports = [ inputs.tmux-flake.hjemModules.default ];
 
   tmux.initConfig = lib.mkAfter ''
-    bind | split-window -h -c "#{pane_current_path}"
-    bind - split-window -v -c "#{pane_current_path}"
-    set -g status-style "bg=#161616,fg=#f2f4f8"
+    set -g status on
   '';
 }
 ```
@@ -61,14 +59,14 @@ persistence.enable = false;
 
 ## Zsh integration
 
-Import `inputs.tmux-flake.zshModules.default` into the `zsh-flake` module list
-and enable it explicitly:
+The Hjem module can optionally add the tmux shell integration to the user's
+Zsh configuration:
 
 ```nix
 {
-  imports = [ inputs.tmux-flake.zshModules.default ];
+  imports = [ inputs.tmux-flake.hjemModules.default ];
   integrations.zsh.enable = true;
 }
 ```
 
-This adds `t`, `tl`, `tks`, `tj`, `tjh`, `tk`, and tmux-session completion.
+It is disabled by default and only changes Zsh when explicitly enabled.

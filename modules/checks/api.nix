@@ -23,32 +23,26 @@
               type = lib.types.attrs;
               default = { };
             };
+            options.rum.programs.zsh.initConfig = lib.mkOption {
+              type = lib.types.lines;
+              default = "";
+            };
           })
           {
             tmux.initConfig = lib.mkAfter "set -g @api-test yes";
+            integrations.zsh.enable = true;
           }
         ];
         specialArgs = { inherit pkgs; };
       };
       services = hjem.config.systemd.services;
       tmuxConf = hjem.config.files.".config/tmux/tmux.conf".source;
-      zsh = lib.evalModules {
-        modules = [
-          ../../zsh-modules/default.nix
-          ({ lib, ... }: {
-            options.initConfig = lib.mkOption {
-              type = lib.types.lines;
-              default = "";
-            };
-            config.integrations.zsh.enable = true;
-          })
-        ];
-      };
+      zshInit = pkgs.writeText "zsh-init" hjem.config.rum.programs.zsh.initConfig;
     in
     {
       checks.api = pkgs.runCommand "tmux-flake-api" { } ''
         grep -q '@api-test yes' ${tmuxConf}
-        grep -q 'tj()' ${pkgs.writeText "zsh-init" zsh.config.initConfig}
+        grep -q 'tj()' ${zshInit}
         test '${toString hjem.config.user.linger}' = 1
         test '${toString (services.tmux-sessions-restore.requires)}' = 'tmux-sessions-start.service'
         test '${toString (services.tmux-sessions-default.requires)}' = 'tmux-sessions-restore.service'

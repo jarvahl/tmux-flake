@@ -53,5 +53,4 @@ in
   flake.lib.evalTmuxModules = evalTmuxModules;
   flake.lib.tmuxConfigText = tmuxConfigText;
   flake.lib.tmuxConfiguration = tmuxConfiguration;
-  flake.zshModules.default = ../../zsh-modules/default.nix;
 }
