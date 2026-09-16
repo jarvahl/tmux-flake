@@ -7,7 +7,7 @@
         inherit pkgs;
         modules = [
           {
-            tmux.initConfig = lib.mkAfter ''
+            initConfig = lib.mkAfter ''
               set -g @tmux-flake-smoke "ok"
             '';
           }

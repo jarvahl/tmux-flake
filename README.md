@@ -1,34 +1,42 @@
 # tmux-flake
 
-Reusable tmux configuration and session persistence as Nix modules.
+Reusable tmux configuration and session persistence as a Hjem module.
 
 ## Configuration
 
+Add the Hjem module and configure the `flake` submodule:
+
 ```nix
 {
-  mouse.enable = true;
-  mode = "vi";
+  imports = [ inputs.tmux-flake.hjemModules.default ];
 
-  windows = {
-    baseIndex = 1;
-    paneBaseIndex = 1;
-    renumber = true;
-  };
-
-  history.limit = 50000;
-  prefix2 = "Home";
-
-  extendedKeys = {
+  rum.programs.tmux.flake = {
     enable = true;
-    format = "csi-u";
-  };
+    mouse.enable = true;
+    mode = "vi";
 
-  persistence.enable = true;
+    windows = {
+      baseIndex = 1;
+      paneBaseIndex = 1;
+      renumber = true;
+    };
+
+    history.limit = 50000;
+    prefix2 = "Home";
+
+    extendedKeys = {
+      enable = true;
+      format = "csi-u";
+    };
+
+    persistence.enable = true;
+  };
 }
 ```
 
-Add `inputs.tmux-flake.hjemModules.default` to Hjem's extra modules to install
-this configuration, its packages, and its user-session services.
+The Hjem module writes `~/.config/tmux/tmux.conf`, installs tmux and the
+persistence plugins, and creates the user-session services. User lingering remains a
+NixOS/user-level setting and is configured by the consuming system.
 
 Run the configured tmux with:
 
@@ -38,35 +46,34 @@ nix run
 
 ### Extending Tmux with Custom Modules
 
-You can extend the generated configuration from another module. Personal
-bindings and status styling belong in the consuming configuration:
+Personal keybindings and status styling belong in the consuming configuration:
 
 ```nix
-{
-  imports = [ inputs.tmux-flake.hjemModules.default ];
+rum.programs.tmux.flake.initConfig = lib.mkAfter ''
+  set -g status on
+'';
+```
 
-  tmux.initConfig = lib.mkAfter ''
-    set -g status on
-  '';
-}
+Enable lingering separately at the NixOS/user level when the services must run
+without an active login:
+
+```nix
+users.users.<name>.linger = true;
 ```
 
 Disable persistence when only the tmux configuration and package are needed:
 
 ```nix
-persistence.enable = false;
+rum.programs.tmux.flake.persistence.enable = false;
 ```
 
-## Zsh integration
-
-The Hjem module can optionally add the tmux shell integration to the user's
-Zsh configuration:
+The configuration is also available through the library API:
 
 ```nix
-{
-  imports = [ inputs.tmux-flake.hjemModules.default ];
-  integrations.zsh.enable = true;
+self.lib.tmuxConfigText {
+  inherit pkgs;
+  modules = [
+    { initConfig = "set -g status on"; }
+  ];
 }
 ```
-
-It is disabled by default and only changes Zsh when explicitly enabled.

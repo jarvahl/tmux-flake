@@ -1,28 +1,33 @@
-{ config, lib, ... }:
+{ lib, ... }:
 {
-  options.tmux.windows = {
-    baseIndex = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 1;
-      description = "First window index.";
-    };
+  tmux.modules = [
+    ({ config, lib, ... }:
+      {
+        options.windows = {
+          baseIndex = lib.mkOption {
+            type = lib.types.ints.positive;
+            default = 1;
+            description = "First window index.";
+          };
 
-    paneBaseIndex = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 1;
-      description = "First pane index.";
-    };
+          paneBaseIndex = lib.mkOption {
+            type = lib.types.ints.positive;
+            default = 1;
+            description = "First pane index.";
+          };
 
-    renumber = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Renumber windows after one is closed.";
-    };
-  };
+          renumber = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = "Renumber windows after one is closed.";
+          };
+        };
 
-  config.tmux.initConfig = lib.mkBefore ''
-    set -g base-index ${toString config.tmux.windows.baseIndex}
-    setw -g pane-base-index ${toString config.tmux.windows.paneBaseIndex}
-    set -g renumber-windows ${if config.tmux.windows.renumber then "on" else "off"}
-  '';
+        config.rc = lib.mkBefore ''
+          set -g base-index ${toString config.windows.baseIndex}
+          setw -g pane-base-index ${toString config.windows.paneBaseIndex}
+          set -g renumber-windows ${if config.windows.renumber then "on" else "off"}
+        '';
+      })
+  ];
 }

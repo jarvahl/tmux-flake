@@ -1,16 +1,5 @@
 { config, inputs, lib, ... }:
 let
-  baseModules = [
-    ./modules/options.nix
-    ./modules/mouse.nix
-    ./modules/mode.nix
-    ./modules/windows.nix
-    ./modules/history.nix
-    ./modules/prefix.nix
-    ./modules/extended-keys.nix
-    ./modules/persistence.nix
-  ];
-
   evalTmuxModules =
     { pkgs
     , modules ? [ ]
@@ -18,7 +7,7 @@ let
     ,
     }:
     lib.evalModules {
-      modules = baseModules ++ config.tmux.modules ++ modules;
+      modules = config.tmux.modules ++ modules;
       specialArgs = {
         inherit pkgs inputs;
       } // specialArgs;
@@ -30,7 +19,7 @@ let
     , specialArgs ? { }
     ,
     }:
-    (evalTmuxModules { inherit pkgs modules specialArgs; }).config.tmux.initConfig;
+    (evalTmuxModules { inherit pkgs modules specialArgs; }).config.rc;
 
   tmuxConfiguration =
     { pkgs
